@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer's Masterlist - Login</title>
+    <link rel="stylesheet" href="CSS/index.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="header">
+                <h1>Login</h1>
+                <p>FARMER MASTERLIST</p>
+            </div>
+
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    class="input-field" 
+                    id="username" 
+                    placeholder="User Name"
+                    autocomplete="username"
+                >
+                <div class="input-icon">
+                    <svg class="eye-icon" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input 
+                    type="password" 
+                    class="input-field" 
+                    id="password" 
+                    placeholder="Password"
+                    autocomplete="current-password"
+                >
+                <div class="input-icon" id="togglePassword">
+                    <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon" id="eyeOffIcon" viewBox="0 0 24 24" style="display: none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+
+            <button class="login-button" id="loginButton">Login</button>
+
+            <div class="signup-text">
+                Don't have an account? <a href="#" id="signupLink">Signup</a>
+            </div>
+
+            <div class="footer">
+                <p>Created for Farmer's Masterlist</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            // Toggle eye icons
+            if (type === 'text') {
+                eyeIcon.style.display = 'none';
+                eyeOffIcon.style.display = 'block';
+            } else {
+                eyeIcon.style.display = 'block';
+                eyeOffIcon.style.display = 'none';
+            }
+        });
+
+        // Handle login button click
+        const loginButton = document.getElementById('loginButton');
+        const usernameInput = document.getElementById('username');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+
+        loginButton.addEventListener('click', function() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            const rememberMe = rememberMeCheckbox.checked;
+
+            if (!username) {
+                alert('Please enter your username');
+                usernameInput.focus();
+                return;
+            }
+
+            if (!password) {
+                alert('Please enter your password');
+                passwordInput.focus();
+                return;
+            }
+
+            // Hardcoded credentials
+            const validUsername = 'admin';
+            const validPassword = 'farmer123';
+
+            // Check credentials
+            if (username === validUsername && password === validPassword) {
+                // Successful login
+                console.log('Login successful:', {
+                    username: username,
+                    rememberMe: rememberMe
+                });
+                
+                // Redirect to home page
+                window.location.href = 'home.html';
+            } else {
+                // Failed login
+                alert('Invalid username or password!\n\nPlease try again.');
+                passwordInput.value = '';
+                usernameInput.focus();
+            }
+        });
+
+        // Handle Enter key press
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                loginButton.click();
+            }
+        });
+
+        // Handle signup link click
+        const signupLink = document.getElementById('signupLink');
+        signupLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            alert('Signup page would be loaded here!');
+            // In a real application: window.location.href = '/signup';
+        });
+    </script>
+</body>
+</html>
