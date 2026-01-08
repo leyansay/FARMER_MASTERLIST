@@ -1,13 +1,13 @@
-
-        // Firebase Configuration
+ // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyAwEDxPVbztJlZRE07KPUuigJsHZ5IVSb4",
-            authDomain: "farmer-s-masterlist.firebaseapp.com",
-            databaseURL: "https://farmer-s-masterlist-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "farmer-s-masterlist",
-            storageBucket: "farmer-s-masterlist.firebasestorage.app",
-            messagingSenderId: "933695776546",
-            appId: "1:933695776546:web:0950cbe41ca945ec78e77b"
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
         };
 
         firebase.initializeApp(firebaseConfig);
