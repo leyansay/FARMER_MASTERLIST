@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Farmer Masterlist</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -11,7 +14,9 @@
     <div class="container">
         <div class="header-wrapper">
             <div class="logo-section">
-                <div class="logo-img" style="background: #193532; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">NFA</div>
+                <div class="logo-img">
+                    <img src="pic/nfa.png" alt="NFA Logo">
+                </div>
                 <span class="logo-text">FARMER MASTERLIST</span>
             </div>
 
@@ -24,10 +29,17 @@
 
             <div class="user-section">
                 <div class="user-dropdown" id="userDropdown" onclick="toggleDropdown()">
-                    <span>Admin</span>
+                    <span id="userRoleDisplay">ADMIN</span>
                     <span class="dropdown-arrow">▼</span>
                 </div>
+                <!-- Guest Login Button (will be shown only in guest mode) -->
+                <button class="guest-login-btn" id="guestLoginBtn" style="display: none;" onclick="guestLogin()">
+                    Login
+                </button>
                 <div class="dropdown-menu" id="dropdownMenu">
+                    <button class="dropdown-item" onclick="showPage('profile'); toggleDropdown();">
+                        <span>Profile</span>
+                    </button>
                     <button class="dropdown-item" onclick="logout()">
                         <span>Logout</span>
                     </button>
@@ -41,7 +53,6 @@
                     <h1>Welcome, Admin!</h1>
                     <p>Have a nice day!</p>
                 </div>
-                <div class="welcome-illustration">👨‍💼</div>
             </div>
 
             <div class="main-grid">
@@ -70,7 +81,7 @@
                             <canvas id="genderChart"></canvas>
                         </div>
                         <div class="chart-card">
-                            <h3>Farm Locations</h3>
+                            <h3>Province</h3>
                             <canvas id="locationChart"></canvas>
                         </div>
                     </div>
@@ -111,7 +122,7 @@
                         <tr>
                             <th>Surname</th>
                             <th>Name</th>
-                            <th>M.I.</th>
+                            <th>Middle Name</th>
                             <th>Address Line 1</th>
                             <th>Address Line 2</th>
                             <th>Address Line 3</th>
@@ -131,6 +142,53 @@
                 </table>
             </div>
         </div>
+
+        <div id="profilePage" class="hidden">
+            <h1 class="page-title">Admin Profile</h1>
+            
+            <div class="profile-content">
+                <div class="profile-card-main">
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <img src="pic/default-avatar.png" alt="Admin Avatar" id="avatarImg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23193532%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2240%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22%3EA%3C/text%3E%3C/svg%3E'">
+                        </div>
+                        <h2 id="profileName">Admin</h2>
+                        <p id="profileRoleText" class="profile-role-text">ADMIN</p>
+                    </div>
+                    
+                    <div class="profile-info-grid">
+                        <div class="profile-info-section">
+                            <h3>Personal Information</h3>
+                            <div class="info-row">
+                                <span class="info-label">Name:</span>
+                                <span class="info-value" id="profileDisplayName">Admin</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Username:</span>
+                                <span class="info-value" id="profileUsername">admin</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Email:</span>
+                                <span class="info-value" id="profileEmail">admin@nfa.gov.ph</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Contact:</span>
+                                <span class="info-value" id="profileContact">+63 123 456 7890</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Role:</span>
+                                <span class="info-value" id="profileRole">ADMIN</span>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info-section">
+                            <h3>Account Settings</h3>
+                            <button class="profile-btn" onclick="editProfile()">Edit Profile</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="modal" id="farmerModal">
@@ -141,17 +199,17 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Surname</label>
-                    <input type="text" class="form-input" id="surname" required>
+                    <label class="form-label">Surname *</label>
+                    <input type="text" class="form-input" id="surname" required pattern="[A-Za-z\s]+" title="Surname must contain only letters">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-input" id="name" required>
+                    <label class="form-label">Name *</label>
+                    <input type="text" class="form-input" id="name" required pattern="[A-Za-z\s]+" title="Name must contain only letters">
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Middle Initial</label>
-                <input type="text" class="form-input" id="middleInitial" maxlength="2">
+                <label class="form-label">Middle Name</label>
+                <input type="text" class="form-input" id="middleName" pattern="[A-Za-z\s]+" title="Middle name must contain only letters">
             </div>
             <div class="form-group">
                 <label class="form-label">Address Line 1</label>
@@ -205,36 +263,46 @@
             </div>
             <div class="form-group">
                 <label class="form-label">Contact Number</label>
-                <input type="tel" class="form-input" id="contactNumber" required>
+                <input type="text" class="form-input" id="contactNumber" required pattern="[0-9]{11}" maxlength="11" title="Contact number must be exactly 11 digits">
             </div>
             <button class="submit-btn" onclick="saveFarmer()">Save Farmer</button>
         </div>
     </div>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal" id="editProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Profile</h2>
+                <button class="close-btn" onclick="closeEditProfileModal()">×</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-input" id="editFullName" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" class="form-input" id="editUsername" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-input" id="editEmail" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Contact Number</label>
+                <input type="text" class="form-input" id="editContact">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <input type="text" class="form-input" id="editRole" value="ADMIN" readonly style="background-color: #f5f5f5; cursor: not-allowed;">
+            </div>
+            <button class="submit-btn" onclick="saveProfile()">Save Changes</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <script src="JS/home.js"></script>
-<script>
-    function showPage(page) {
-            const homeBtn = document.querySelectorAll('.nav-item')[0];
-            const masterlistBtn = document.querySelectorAll('.nav-item')[1];
-            const homePage = document.getElementById('homePage');
-            const masterlistPage = document.getElementById('masterlistPage');
-
-            if (page === 'home') {
-                homePage.classList.remove('hidden');
-                masterlistPage.classList.add('hidden');
-                homeBtn.classList.add('active');
-                masterlistBtn.classList.remove('active');
-                updateStats();
-            } else {
-                homePage.classList.add('hidden');
-                masterlistPage.classList.remove('hidden');
-                homeBtn.classList.remove('active');
-                masterlistBtn.classList.add('active');
-                renderTable();
-            }
-        }
-    </script>
+    <script src="JS/guest-mode.js"></script>
 </body>
 </html>
