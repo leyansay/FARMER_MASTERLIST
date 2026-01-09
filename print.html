@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Masterlist - Print</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            background: white;
+        }
+
+        .print-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #193532;
+            padding-bottom: 20px;
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .logo-img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .logo-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #193532;
+            margin-bottom: 5px;
+        }
+
+        .header-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .print-date {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .print-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .total-count {
+            font-size: 16px;
+            font-weight: 600;
+            color: #193532;
+        }
+
+        .print-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #8BEB9B 0%, #6BCF7B 100%);
+            color: #193532;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 235, 155, 0.3);
+        }
+
+        .back-btn {
+            padding: 12px 30px;
+            background: #193532;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .back-btn:hover {
+            background: #2d5650;
+        }
+
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .print-table thead {
+            background: #193532;
+        }
+
+        .print-table th {
+            padding: 15px 12px;
+            text-align: left;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #2d5650;
+        }
+
+        .print-table tbody tr {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .print-table tbody tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .print-table tbody tr:hover {
+            background: #E8F5E9;
+        }
+
+        .print-table td {
+            padding: 12px;
+            font-size: 13px;
+            color: #333;
+            border: 1px solid #e0e0e0;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+                padding: 10px;
+            }
+
+            .print-controls {
+                display: none !important;
+            }
+
+            .print-header {
+                border-bottom: 2px solid #193532;
+                margin-bottom: 20px;
+                page-break-inside: avoid;
+            }
+
+            .print-date {
+                display: block !important;
+                font-size: 14px;
+                color: #333 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-table {
+                box-shadow: none;
+            }
+
+            .print-table th {
+                background: #193532 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .print-table tbody tr:nth-child(even) {
+                background: #f5f5f5 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            @page {
+                margin: 1cm;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .print-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .print-table {
+                font-size: 11px;
+            }
+
+            .print-table th,
+            .print-table td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls">
+        <div class="total-count">Total Farmers: <span id="totalFarmers">0</span></div>
+        <div>
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+        </div>
+    </div>
+
+    <div class="print-header">
+        <div class="header-logo">
+            <div class="logo-img">
+                <img src="pic/nfa.png" alt="NFA Logo" onerror="this.style.display='none'">
+            </div>
+            <div>
+                <div class="header-title">FARMER MASTERLIST</div>
+                <div class="header-subtitle">National Food Authority</div>
+            </div>
+        </div>
+        <div class="print-date" id="printDate"></div>
+    </div>
+
+    <table class="print-table">
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Full Name</th>
+                <th>Farm Location</th>
+                <th>Farm Area (ha)</th>
+                <th>RSBSA Number</th>
+            </tr>
+        </thead>
+        <tbody id="printTableBody">
+            <tr>
+                <td colspan="5" class="no-data">Loading farmer data...</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://farmer-s-masterlist-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const farmersRef = database.ref('farmers');
+
+        // Set print date
+        document.getElementById('printDate').textContent = 'Printed on: ' + new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Load farmers from Firebase
+        function loadFarmers() {
+            farmersRef.once('value')
+                .then(snapshot => {
+                    const farmers = [];
+                    snapshot.forEach(childSnapshot => {
+                        const farmer = childSnapshot.val();
+                        farmer.id = childSnapshot.key;
+                        farmers.push(farmer);
+                    });
+
+                    // Sort by date added (latest first)
+                    farmers.sort((a, b) => {
+                        const dateA = new Date(a.dateAdded || 0);
+                        const dateB = new Date(b.dateAdded || 0);
+                        return dateB - dateA;
+                    });
+
+                    displayFarmers(farmers);
+                })
+                .catch(error => {
+                    console.error('Error loading farmers:', error);
+                    document.getElementById('printTableBody').innerHTML = 
+                        '<tr><td colspan="5" class="no-data">Error loading farmer data. Please try again.</td></tr>';
+                });
+        }
+
+        function displayFarmers(farmers) {
+            const tbody = document.getElementById('printTableBody');
+            document.getElementById('totalFarmers').textContent = farmers.length;
+
+            if (farmers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="no-data">No farmers found in the database.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            farmers.forEach((farmer, index) => {
+                const fullName = `${farmer.surname || ''} ${farmer.name || ''} ${farmer.middleName || ''}`.trim();
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${fullName || 'N/A'}</td>
+                    <td>${farmer.farmLocation || 'N/A'}</td>
+                    <td>${farmer.farmArea || 'N/A'}</td>
+                    <td>${farmer.rsbsaNumber || 'N/A'}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        function goBack() {
+            window.history.back();
+        }
+
+        // Load farmers on page load
+        window.addEventListener('DOMContentLoaded', loadFarmers);
+    </script>
+</body>
+</html>

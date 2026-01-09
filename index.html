@@ -2,114 +2,284 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farmer's Masterlist - Login</title>
-    <link rel="stylesheet" href="CSS/index.css">
+    <title>Loading - Farmer Masterlist</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 90%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-container {
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: #193532;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(25, 53, 50, 0.3);
+        }
+
+        .logo img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #193532;
+            margin-bottom: 10px;
+        }
+
+        .app-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .spinner-container {
+            margin: 30px 0;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8BEB9B;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-text {
+            font-size: 18px;
+            color: #193532;
+            margin-top: 20px;
+            font-weight: 500;
+            min-height: 27px;
+        }
+
+        .status-subtext {
+            font-size: 14px;
+            color: #999;
+            margin-top: 10px;
+            min-height: 21px;
+        }
+
+        .error-container {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4444;
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .retry-btn {
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #8BEB9B 0%, #6BCF7B 100%);
+            color: #193532;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 235, 155, 0.3);
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 235, 155, 0.4);
+        }
+
+        .retry-btn:active {
+            transform: translateY(0);
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #8BEB9B 0%, #6BCF7B 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: white;
+            animation: scaleIn 0.5s ease;
+            box-shadow: 0 4px 15px rgba(139, 235, 155, 0.3);
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #ddd;
+            border-radius: 50%;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% {
+                background: #ddd;
+                transform: scale(1);
+            }
+            50% {
+                background: #8BEB9B;
+                transform: scale(1.3);
+            }
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+    </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="header">
-                <h1>Login</h1>
-                <p>FARMER MASTERLIST</p>
-            </div>
-
-            <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage"></div>
-
-            <div class="input-group">
-                <input 
-                    type="email" 
-                    class="input-field" 
-                    id="email" 
-                    placeholder="Email"
-                    autocomplete="email"
-                >
-                <div class="input-icon">
-                    <svg class="eye-icon" viewBox="0 0 24 24">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                    </svg>
+    <div class="loading-container">
+        <div id="loadingState">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="pic/nfa.png" alt="NFA Logo" onerror="this.style.display='none'">
                 </div>
+                <div class="app-title">FARMER MASTERLIST</div>
+                <div class="app-subtitle">National Food Authority</div>
             </div>
 
-            <div class="input-group">
-                <input 
-                    type="password" 
-                    class="input-field" 
-                    id="password" 
-                    placeholder="Password"
-                    autocomplete="current-password"
-                >
-                <div class="input-icon" id="togglePassword">
-                    <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
-                    </svg>
-                    <svg class="eye-icon" id="eyeOffIcon" viewBox="0 0 24 24" style="display: none;">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                </div>
+            <div class="spinner-container">
+                <div class="spinner"></div>
             </div>
 
-            <div class="remember-me">
-                <input type="checkbox" id="rememberMe">
-                <label for="rememberMe">Remember me</label>
-            </div>
+            <div class="status-text" id="statusText">Checking internet connection...</div>
+            <div class="status-subtext" id="statusSubtext">Please wait</div>
 
-            <button class="login-button" id="loginButton">Login</button>
-
-            <div class="divider">
-                <span>OR</span>
-            </div>
-
-            <button class="guest-button" id="guestButton">Continue as Guest</button>
-
-            <div class="footer">
-                <p>Created for Farmer's Masterlist</p>
+            <div class="progress-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
             </div>
         </div>
+
+        <div id="errorState" class="error-container">
+            <div class="error-icon">⚠️</div>
+            <div class="error-title" id="errorTitle">Connection Error</div>
+            <div class="error-message" id="errorMessage">
+                Unable to connect to the internet.<br>
+                Please check your connection and try again.
+            </div>
+            <button class="retry-btn" onclick="retryConnection()">🔄 Retry Connection</button>
+        </div>
+
+        <div class="footer-text">© 2026 National Food Authority</div>
     </div>
 
-    <!-- Firebase SDK v8 -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script>
-        // ==========================================
-        // PREVENT LOGGED-IN USERS FROM ACCESSING LOGIN PAGE
-        // ==========================================
-        (function() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            const sessionActive = sessionStorage.getItem('sessionActive');
-            
-            if (isLoggedIn || sessionActive) {
-                window.location.replace('home.html');
-                return;
-            }
-        })();
-
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                window.location.reload();
-            }
-        });
-
-        window.history.forward();
-
-        // ==========================================
-        // FIREBASE CONFIGURATION
-        // ==========================================
         const firebaseConfig = {
             apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
             authDomain: "nfa-main.firebaseapp.com",
-            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            databaseURL: "https://farmer-s-masterlist-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "nfa-main",
             storageBucket: "nfa-main.firebasestorage.app",
             messagingSenderId: "314192469082",
@@ -117,188 +287,136 @@
             measurementId: "G-ZEJP0S67SY"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
+        let checkAttempts = 0;
+        const maxAttempts = 3;
 
-        const passwordInput = document.getElementById('password');
-        const togglePassword = document.getElementById('togglePassword');
-        const eyeIcon = document.getElementById('eyeIcon');
-        const eyeOffIcon = document.getElementById('eyeOffIcon');
-        const loginButton = document.getElementById('loginButton');
-        const guestButton = document.getElementById('guestButton');
-        const emailInput = document.getElementById('email');
-        const rememberMeCheckbox = document.getElementById('rememberMe');
-
-        // ==========================================
-        // PASSWORD VISIBILITY TOGGLE
-        // ==========================================
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            if (type === 'text') {
-                eyeIcon.style.display = 'none';
-                eyeOffIcon.style.display = 'block';
-            } else {
-                eyeIcon.style.display = 'block';
-                eyeOffIcon.style.display = 'none';
-            }
-        });
-
-        // ==========================================
-        // MESSAGE FUNCTIONS
-        // ==========================================
-        function showError(message) {
-            const errorMsg = document.getElementById('errorMessage');
-            const successMsg = document.getElementById('successMessage');
-            if (errorMsg) {
-                errorMsg.textContent = message;
-                errorMsg.style.display = 'block';
-            }
-            if (successMsg) {
-                successMsg.style.display = 'none';
-            }
-            setTimeout(() => {
-                if (errorMsg) errorMsg.style.display = 'none';
-            }, 5000);
+        function updateStatus(text, subtext = '') {
+            document.getElementById('statusText').textContent = text;
+            document.getElementById('statusSubtext').textContent = subtext;
         }
 
-        function showSuccess(message) {
-            const successMsg = document.getElementById('successMessage');
-            const errorMsg = document.getElementById('errorMessage');
-            if (successMsg) {
-                successMsg.textContent = message;
-                successMsg.style.display = 'block';
-            }
-            if (errorMsg) {
-                errorMsg.style.display = 'none';
-            }
+        function showError(title, message) {
+            document.getElementById('errorTitle').textContent = title;
+            document.getElementById('errorMessage').innerHTML = message;
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
         }
 
-        // ==========================================
-        // GUEST LOGIN HANDLER
-        // ==========================================
-        guestButton.addEventListener('click', function() {
-            // Set guest mode flags
-            localStorage.setItem('isGuest', 'true');
-            localStorage.setItem('isLoggedIn', 'true');
-            sessionStorage.setItem('sessionActive', 'true');
-            sessionStorage.setItem('loginTime', Date.now().toString());
-            
-            showSuccess('Continuing as guest...');
-            
-            setTimeout(() => {
-                window.location.replace('home.html');
-            }, 500);
-        });
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('errorState').style.display = 'none';
+        }
 
-        // ==========================================
-        // LOGIN HANDLER
-        // ==========================================
-        async function handleLogin() {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            const rememberMe = rememberMeCheckbox.checked;
+        function retryConnection() {
+            checkAttempts = 0;
+            showLoading();
+            checkConnection();
+        }
 
-            if (!email) {
-                showError('Please enter your email');
-                emailInput.focus();
-                return;
-            }
-
-            if (!password) {
-                showError('Please enter your password');
-                passwordInput.focus();
-                return;
-            }
-
-            loginButton.disabled = true;
-            loginButton.textContent = 'Logging in...';
-
+        async function checkInternetConnection() {
             try {
-                const persistence = rememberMe ? 
-                    firebase.auth.Auth.Persistence.LOCAL : 
-                    firebase.auth.Auth.Persistence.SESSION;
-                
-                await auth.setPersistence(persistence);
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                // Clear guest mode if exists
-                localStorage.removeItem('isGuest');
+                await fetch('https://www.google.com/favicon.ico', {
+                    mode: 'no-cors',
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
                 
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userId', user.uid);
-                sessionStorage.setItem('sessionActive', 'true');
-                sessionStorage.setItem('loginTime', Date.now().toString());
-
-                showSuccess('Login successful! Redirecting...');
-                
-                window.history.replaceState(null, null, 'home.html');
-                
-                setTimeout(() => {
-                    window.location.replace('home.html');
-                }, 1000);
-
+                clearTimeout(timeoutId);
+                return true;
             } catch (error) {
-                console.error('Login error:', error);
-                
-                let errorMsg = 'Login failed. Please try again.';
-                
-                switch (error.code) {
-                    case 'auth/invalid-email':
-                        errorMsg = 'Invalid email address.';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMsg = 'This account has been disabled.';
-                        break;
-                    case 'auth/user-not-found':
-                        errorMsg = 'No account found with this email.';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMsg = 'Incorrect password.';
-                        break;
-                    case 'auth/invalid-credential':
-                        errorMsg = 'Invalid email or password.';
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMsg = 'Too many failed attempts. Please try again later.';
-                        break;
-                    case 'auth/network-request-failed':
-                        errorMsg = 'Network error. Please check your connection.';
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMsg = 'Email/Password authentication is not enabled.';
-                        break;
-                    default:
-                        if (error.message.includes('OPERATION_NOT_ALLOWED')) {
-                            errorMsg = 'Email/Password authentication is not enabled in Firebase Console.';
-                        }
-                        break;
+                return false;
+            }
+        }
+
+        async function checkFirebaseConnection() {
+            try {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
                 }
                 
-                showError(errorMsg);
-            } finally {
-                loginButton.disabled = false;
-                loginButton.textContent = 'Login';
+                const database = firebase.database();
+                
+                const connectionPromise = database.ref('.info/connected').once('value');
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Firebase timeout')), 10000)
+                );
+                
+                await Promise.race([connectionPromise, timeoutPromise]);
+                return true;
+            } catch (error) {
+                return false;
             }
         }
 
-        // ==========================================
-        // EVENT LISTENERS
-        // ==========================================
-        loginButton.addEventListener('click', handleLogin);
+        async function checkConnection() {
+            checkAttempts++;
+            
+            updateStatus('Checking internet connection...', `Attempt ${checkAttempts}/${maxAttempts}`);
 
-        document.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                handleLogin();
+            // Step 1: Check internet connection first
+            const hasInternet = await checkInternetConnection();
+            
+            if (!hasInternet) {
+                if (checkAttempts < maxAttempts) {
+                    updateStatus('No internet connection', `Retrying... (${checkAttempts}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    checkConnection();
+                } else {
+                    showError(
+                        'No Internet Connection',
+                        'Unable to connect to the internet.<br>Please check your network and try again.'
+                    );
+                }
+                return;
             }
+
+            // Step 2: Internet is available, now check Firebase
+            updateStatus('Internet connected!', 'Checking Firebase...');
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            updateStatus('Connecting to Firebase...', 'Please wait');
+            
+            const hasFirebase = await checkFirebaseConnection();
+            
+            if (!hasFirebase) {
+                if (checkAttempts < maxAttempts) {
+                    updateStatus('Firebase connection failed', `Retrying... (${checkAttempts}/${maxAttempts})`);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    checkConnection();
+                } else {
+                    showError(
+                        'Firebase Connection Error',
+                        'Unable to connect to Firebase database.<br>Please try again later.'
+                    );
+                }
+                return;
+            }
+
+            // Step 3: Both connections successful, proceed to login
+            updateStatus('Connected successfully!', 'Redirecting...');
+            
+            const loadingState = document.getElementById('loadingState');
+            loadingState.innerHTML = `
+                <div class="success-icon">✓</div>
+                <div class="status-text">All systems ready!</div>
+                <div class="status-subtext">Redirecting to login...</div>
+            `;
+            
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            window.location.href = 'login.html';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(checkConnection, 1000);
         });
 
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                window.location.replace('home.html');
-            }
+        window.history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', function() {
+            window.history.pushState(null, null, window.location.href);
         });
     </script>
 </body>

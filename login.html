@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer's Masterlist - Login</title>
+    <link rel="stylesheet" href="CSS/index.css">
+
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="header">
+                <h1>Login</h1>
+                <p>FARMER MASTERLIST</p>
+            </div>
+
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="input-group">
+                <input 
+                    type="email" 
+                    class="input-field" 
+                    id="email" 
+                    placeholder="Email"
+                    autocomplete="email"
+                >
+                <div class="input-icon">
+                    <svg class="eye-icon" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <input 
+                    type="password" 
+                    class="input-field" 
+                    id="password" 
+                    placeholder="Password"
+                    autocomplete="current-password"
+                >
+                <div class="input-icon" id="togglePassword">
+                    <svg class="eye-icon" id="eyeIcon" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-icon" id="eyeOffIcon" viewBox="0 0 24 24" style="display: none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+
+            <button class="login-button" id="loginButton">Login</button>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <button class="guest-button" id="guestButton">Continue as Guest</button>
+
+            <div class="footer">
+                <p>Created for Farmer's Masterlist</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK v8 -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // ==========================================
+        // PREVENT LOGGED-IN USERS FROM ACCESSING LOGIN PAGE
+        // ==========================================
+        (function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const sessionActive = sessionStorage.getItem('sessionActive');
+            
+            if (isLoggedIn || sessionActive) {
+                window.location.replace('home.html');
+                return;
+            }
+        })();
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
+
+        window.history.forward();
+
+        // ==========================================
+        // FIREBASE CONFIGURATION
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://nfa-main-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const passwordInput = document.getElementById('password');
+        const togglePassword = document.getElementById('togglePassword');
+        const eyeIcon = document.getElementById('eyeIcon');
+        const eyeOffIcon = document.getElementById('eyeOffIcon');
+        const loginButton = document.getElementById('loginButton');
+        const guestButton = document.getElementById('guestButton');
+        const emailInput = document.getElementById('email');
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+
+        // ==========================================
+        // PASSWORD VISIBILITY TOGGLE
+        // ==========================================
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            if (type === 'text') {
+                eyeIcon.style.display = 'none';
+                eyeOffIcon.style.display = 'block';
+            } else {
+                eyeIcon.style.display = 'block';
+                eyeOffIcon.style.display = 'none';
+            }
+        });
+
+        // ==========================================
+        // MESSAGE FUNCTIONS
+        // ==========================================
+        function showError(message) {
+            const errorMsg = document.getElementById('errorMessage');
+            const successMsg = document.getElementById('successMessage');
+            if (errorMsg) {
+                errorMsg.textContent = message;
+                errorMsg.style.display = 'block';
+            }
+            if (successMsg) {
+                successMsg.style.display = 'none';
+            }
+            setTimeout(() => {
+                if (errorMsg) errorMsg.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            if (successMsg) {
+                successMsg.textContent = message;
+                successMsg.style.display = 'block';
+            }
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+            }
+        }
+
+        // ==========================================
+        // GUEST LOGIN HANDLER
+        // ==========================================
+        guestButton.addEventListener('click', function() {
+            // Set guest mode flags
+            localStorage.setItem('isGuest', 'true');
+            localStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('sessionActive', 'true');
+            sessionStorage.setItem('loginTime', Date.now().toString());
+            
+            showSuccess('Continuing as guest...');
+            
+            setTimeout(() => {
+                window.location.replace('home.html');
+            }, 500);
+        });
+
+        // ==========================================
+        // LOGIN HANDLER
+        // ==========================================
+        async function handleLogin() {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+            const rememberMe = rememberMeCheckbox.checked;
+
+            if (!email) {
+                showError('Please enter your email');
+                emailInput.focus();
+                return;
+            }
+
+            if (!password) {
+                showError('Please enter your password');
+                passwordInput.focus();
+                return;
+            }
+
+            loginButton.disabled = true;
+            loginButton.textContent = 'Logging in...';
+
+            try {
+                const persistence = rememberMe ? 
+                    firebase.auth.Auth.Persistence.LOCAL : 
+                    firebase.auth.Auth.Persistence.SESSION;
+                
+                await auth.setPersistence(persistence);
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Clear guest mode if exists
+                localStorage.removeItem('isGuest');
+                
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userId', user.uid);
+                sessionStorage.setItem('sessionActive', 'true');
+                sessionStorage.setItem('loginTime', Date.now().toString());
+
+                showSuccess('Login successful! Redirecting...');
+                
+                window.history.replaceState(null, null, 'home.html');
+                
+                setTimeout(() => {
+                    window.location.replace('home.html');
+                }, 1000);
+
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                let errorMsg = 'Login failed. Please try again.';
+                
+                switch (error.code) {
+                    case 'auth/invalid-email':
+                        errorMsg = 'Invalid email address.';
+                        break;
+                    case 'auth/user-disabled':
+                        errorMsg = 'This account has been disabled.';
+                        break;
+                    case 'auth/user-not-found':
+                        errorMsg = 'No account found with this email.';
+                        break;
+                    case 'auth/wrong-password':
+                        errorMsg = 'Incorrect password.';
+                        break;
+                    case 'auth/invalid-credential':
+                        errorMsg = 'Invalid email or password.';
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMsg = 'Too many failed attempts. Please try again later.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMsg = 'Network error. Please check your connection.';
+                        break;
+                    case 'auth/operation-not-allowed':
+                        errorMsg = 'Email/Password authentication is not enabled.';
+                        break;
+                    default:
+                        if (error.message.includes('OPERATION_NOT_ALLOWED')) {
+                            errorMsg = 'Email/Password authentication is not enabled in Firebase Console.';
+                        }
+                        break;
+                }
+                
+                showError(errorMsg);
+            } finally {
+                loginButton.disabled = false;
+                loginButton.textContent = 'Login';
+            }
+        }
+
+        // ==========================================
+        // EVENT LISTENERS
+        // ==========================================
+        loginButton.addEventListener('click', handleLogin);
+
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                handleLogin();
+            }
+        });
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                window.location.replace('home.html');
+            }
+        });
+    </script>
+</body>
+</html>

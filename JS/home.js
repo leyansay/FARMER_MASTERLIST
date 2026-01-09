@@ -424,6 +424,10 @@ function editProfile() {
     document.getElementById('editEmail').value = currentEmail;
     document.getElementById('editContact').value = currentContact;
     document.getElementById('editRole').value = 'ADMIN';
+    
+    // Clear password fields
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editConfirmPassword').value = '';
 }
 
 function closeEditProfileModal() {
@@ -661,12 +665,12 @@ function renderTable() {
         }
     }
     
-    let sortedFarmers = [...farmers];
-    if (sortOrder === 'latest') {
-        sortedFarmers.sort((a, b) => b.dateAdded - a.dateAdded);
-    } else {
-        sortedFarmers.sort((a, b) => a.dateAdded - b.dateAdded);
-    }
+let sortedFarmers = [...farmers];
+sortedFarmers.sort((a, b) => {
+    const surnameA = (a.surname || '').toUpperCase();
+    const surnameB = (b.surname || '').toUpperCase();
+    return surnameA.localeCompare(surnameB);
+});
     
     tbody.innerHTML = '';
     
