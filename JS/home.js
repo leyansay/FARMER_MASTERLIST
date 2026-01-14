@@ -343,8 +343,19 @@ window.addEventListener('DOMContentLoaded', function() {
     // Hide Add Farmer button and dropdown arrow if guest
     if (isGuestMode()) {
         const addBtn = document.querySelector('.add-btn');
+         const importBtn = document.querySelector('.import-btn');
+          const printBtn = document.querySelector('.print-btn-main');
         if (addBtn) {
             addBtn.style.display = 'none';
+        }
+
+        if (importBtn) {
+            importBtn.style.display = 'none';
+        }
+
+        
+        if (printBtn) {
+            printBtn.style.display = 'none';
         }
         
         // Hide dropdown arrow for guest
@@ -523,8 +534,9 @@ function loadFarmersFromFirebase() {
 function updateStats() {
     document.getElementById('totalFarmers').textContent = farmers.length;
     
-    const maleCount = farmers.filter(f => f.gender === 'Male').length;
-    const femaleCount = farmers.filter(f => f.gender === 'Female').length;
+    // FIXED: Filter out N/A, null, undefined for gender count
+    const maleCount = farmers.filter(f => f.gender && f.gender.toLowerCase() === 'male').length;
+    const femaleCount = farmers.filter(f => f.gender && f.gender.toLowerCase() === 'female').length;
     
     const now = new Date();
     const currentMonth = now.getMonth();
@@ -543,10 +555,18 @@ function updateStats() {
     document.getElementById('thisMonth').textContent = thisMonthCount;
     document.getElementById('thisYear').textContent = thisYearCount;
     
-    const locationCount = {};
+    // FIXED: Use address2 (Municipality) instead of address3 (Province)
+const locationCount = {};
     farmers.forEach(farmer => {
-        const location = farmer.address3 || 'Unknown';
-        locationCount[location] = (locationCount[location] || 0) + 1;
+        const location = farmer.address3 || ''; // Use address3 for Province
+        // Skip if empty, N/A, undefined, or contains "ADDRESS"
+        if (location && 
+            location !== 'N/A' && 
+            location.trim() !== '' &&
+            !location.toUpperCase().includes('ADDRESS')) {
+            const cleanLocation = location.trim().toUpperCase();
+            locationCount[cleanLocation] = (locationCount[cleanLocation] || 0) + 1;
+        }
     });
     
     updateCharts(maleCount, femaleCount, locationCount);
@@ -558,59 +578,82 @@ function updateCharts(maleCount, femaleCount, locationCount) {
     if (window.genderChart instanceof Chart) {
         window.genderChart.destroy();
     }
-    window.genderChart = new Chart(genderCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Male', 'Female'],
-            datasets: [{
-                data: [maleCount, femaleCount],
-                backgroundColor: ['#193532', '#8BEB9B'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
+    
+    // FIXED: Only create chart if there's gender data
+    if (maleCount > 0 || femaleCount > 0) {
+        window.genderChart = new Chart(genderCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Male', 'Female'],
+                datasets: [{
+                    data: [maleCount, femaleCount],
+                    backgroundColor: ['#193532', '#8BEB9B'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
                 }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no gender data
+        genderCtx.getContext('2d').clearRect(0, 0, genderCtx.width, genderCtx.height);
+        const ctx = genderCtx.getContext('2d');
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('No gender data available', genderCtx.width / 2, genderCtx.height / 2);
+    }
 
     const locationCtx = document.getElementById('locationChart');
     if (window.locationChart instanceof Chart) {
         window.locationChart.destroy();
     }
     
-    window.locationChart = new Chart(locationCtx, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(locationCount),
-            datasets: [{
-                label: 'Farmers',
-                data: Object.values(locationCount),
-                backgroundColor: '#8BEB9B',
-                borderColor: '#193532',
-                borderWidth: 2,
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: { stepSize: 1 }
-                }
+    // FIXED: Only create chart if there's location data
+    if (Object.keys(locationCount).length > 0) {
+        window.locationChart = new Chart(locationCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(locationCount),
+                datasets: [{
+                    label: 'Farmers',
+                    data: Object.values(locationCount),
+                    backgroundColor: '#8BEB9B',
+                    borderColor: '#193532',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
             },
-            plugins: {
-                legend: { display: false }
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
             }
-        }
-    });
+        });
+    } else {
+        // Show message if no location data
+        locationCtx.getContext('2d').clearRect(0, 0, locationCtx.width, locationCtx.height);
+        const ctx = locationCtx.getContext('2d');
+        ctx.font = '14px Arial';
+        ctx.fillStyle = '#999';
+        ctx.textAlign = 'center';
+        ctx.fillText('No location data available', locationCtx.width / 2, locationCtx.height / 2);
+    }
 }
 
 function updateRecentActivity() {
@@ -647,6 +690,10 @@ function updateRecentActivity() {
 // TABLE FUNCTIONS
 // ==========================================
 
+// ==========================================
+// TABLE FUNCTIONS
+// ==========================================
+
 function renderTable() {
     const tbody = document.getElementById('farmerTableBody');
     const thead = document.querySelector('#farmerTable thead tr');
@@ -665,12 +712,31 @@ function renderTable() {
         }
     }
     
-let sortedFarmers = [...farmers];
-sortedFarmers.sort((a, b) => {
-    const surnameA = (a.surname || '').toUpperCase();
-    const surnameB = (b.surname || '').toUpperCase();
-    return surnameA.localeCompare(surnameB);
-});
+    let sortedFarmers = [...farmers];
+    
+    // Sort based on selected option
+    if (sortOrder === 'latest') {
+        // Sort by dateAdded, latest first
+        sortedFarmers.sort((a, b) => {
+            const dateA = new Date(a.dateAdded || 0);
+            const dateB = new Date(b.dateAdded || 0);
+            return dateB - dateA; // Latest first
+        });
+    } else if (sortOrder === 'oldest') {
+        // Sort by dateAdded, oldest first
+        sortedFarmers.sort((a, b) => {
+            const dateA = new Date(a.dateAdded || 0);
+            const dateB = new Date(b.dateAdded || 0);
+            return dateA - dateB; // Oldest first
+        });
+    } else {
+        // Default: ALWAYS sort alphabetically by surname (A-Z)
+        sortedFarmers.sort((a, b) => {
+            const surnameA = (a.surname || '').toUpperCase();
+            const surnameB = (b.surname || '').toUpperCase();
+            return surnameA.localeCompare(surnameB);
+        });
+    }
     
     tbody.innerHTML = '';
     
@@ -682,6 +748,19 @@ sortedFarmers.sort((a, b) => {
     
     sortedFarmers.forEach(farmer => {
         const row = document.createElement('tr');
+        
+        // Format birthdate to MM/DD/YYYY
+        let formattedBirthdate = 'N/A';
+        if (farmer.birthdate && farmer.birthdate !== 'N/A') {
+            const date = new Date(farmer.birthdate);
+            // Check if date is valid
+            if (!isNaN(date.getTime())) {
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const year = date.getFullYear();
+                formattedBirthdate = `${month}/${day}/${year}`;
+            }
+        }
         
         // For guest mode, completely remove action column
         let actionColumn = '';
@@ -704,26 +783,25 @@ sortedFarmers.sort((a, b) => {
         }
         
         row.innerHTML = `
-            <td>${farmer.surname || ''}</td>
-            <td>${farmer.name || ''}</td>
-            <td>${farmer.middleName || farmer.middleInitial || ''}</td>
-            <td>${farmer.address1 || ''}</td>
-            <td>${farmer.address2 || ''}</td>
-            <td>${farmer.address3 || ''}</td>
-            <td>${farmer.farmLocation || ''}</td>
-            <td>${farmer.birthdate || ''}</td>
-            <td>${farmer.gender || ''}</td>
-            <td>${farmer.civilStatus || ''}</td>
-            <td>${farmer.farmArea ? farmer.farmArea + ' ha' : ''}</td>
-            <td>${farmer.rsbsaNumber || ''}</td>
-            <td>${farmer.contactNumber || ''}</td>
+            <td>${farmer.surname || 'N/A'}</td>
+            <td>${farmer.name || 'N/A'}</td>
+            <td>${farmer.middleName || farmer.middleInitial || 'N/A'}</td>
+            <td>${farmer.address1 || 'N/A'}</td>
+            <td>${farmer.address2 || 'N/A'}</td>
+            <td>${farmer.address3 || 'N/A'}</td>
+            <td>${farmer.farmLocation || 'N/A'}</td>
+            <td>${formattedBirthdate}</td>
+            <td>${farmer.gender || 'N/A'}</td>
+            <td>${farmer.civilStatus || 'N/A'}</td>
+            <td>${farmer.farmArea && farmer.farmArea !== 'N/A' ? farmer.farmArea + ' ha' : 'N/A'}</td>
+            <td>${farmer.rsbsaNumber || 'N/A'}</td>
+            <td>${farmer.contactNumber || 'N/A'}</td>
             ${actionColumn}
         `;
         tbody.appendChild(row);
     });
 }
 
-// Add this sa imong JavaScript file
 document.getElementById('searchBar').addEventListener('input', searchFarmers);
 
 function searchFarmers() {
@@ -802,34 +880,7 @@ function saveFarmer() {
     
     let hasError = false;
     let errors = [];
-    
-    if (!surname) {
-        surnameInput.style.border = '2px solid #ff0000';
-        errors.push('Surname is required');
-        hasError = true;
-    } else if (!/^[A-Za-z\s]+$/.test(surname)) {
-        surnameInput.style.border = '2px solid #ff0000';
-        errors.push('Surname must contain only letters');
-        hasError = true;
-    }
-    
-    if (!name) {
-        nameInput.style.border = '2px solid #ff0000';
-        errors.push('Name is required');
-        hasError = true;
-    } else if (!/^[A-Za-z\s]+$/.test(name)) {
-        nameInput.style.border = '2px solid #ff0000';
-        errors.push('Name must contain only letters');
-        hasError = true;
-    }
-    
-    if (middleName && !/^[A-Za-z\s]+$/.test(middleName)) {
-        middleNameInput.style.border = '2px solid #ff0000';
-        errors.push('Middle name must contain only letters');
-        hasError = true;
-    }
-    
-   
+
     
     if (hasError) {
         showNotification(errors.join('\n'), 'error', 'Validation Error');
@@ -837,20 +888,23 @@ function saveFarmer() {
         return;
     }
     
+    // Helper function to return 'N/A' if value is empty
+    const getValue = (value) => value && value.trim() !== '' ? value.trim().toUpperCase() : 'N/A';
+    
     const farmer = {
         surname: surname.toUpperCase(),
         name: name.toUpperCase(),
-        middleName: middleName.toUpperCase(),
-        address1: document.getElementById('address1').value.trim().toUpperCase(),
-        address2: document.getElementById('address2').value.trim().toUpperCase(),
-        address3: document.getElementById('address3').value.trim().toUpperCase(),
-        farmLocation: document.getElementById('farmLocation').value.trim().toUpperCase(),
-        birthdate: document.getElementById('birthdate').value,
-        gender: document.getElementById('gender').value,
-        civilStatus: document.getElementById('civilStatus').value,
-        farmArea: document.getElementById('farmArea').value,
-        rsbsaNumber: document.getElementById('rsbsaNumber').value.trim().toUpperCase(),
-        contactNumber: contactNumber
+        middleName: getValue(middleName),
+        address1: getValue(document.getElementById('address1').value ||'N/A'),
+        address2: getValue(document.getElementById('address2').value ||'N/A'),
+        address3: getValue(document.getElementById('address3').value ||'N/A'),
+        farmLocation: getValue(document.getElementById('farmLocation').value ||'N/A'),
+        birthdate: document.getElementById('birthdate').value || 'N/A',
+        gender: document.getElementById('gender').value || 'N/A',
+        civilStatus: document.getElementById('civilStatus').value || 'N/A',
+        farmArea: document.getElementById('farmArea').value || 'N/A',
+        rsbsaNumber: getValue(document.getElementById('rsbsaNumber').value ||'N/A'),
+        contactNumber: contactNumber || 'N/A'
     };
 
     console.log('Farmer data:', farmer);
@@ -978,6 +1032,7 @@ function checkGuestMode() {
             dropdownArrow.style.display = 'inline';
         }
     }
+    
 }
 
 // Guest Login Function

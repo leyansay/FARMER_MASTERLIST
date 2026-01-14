@@ -702,7 +702,7 @@
             background: white;
         }
 
-        .add-btn, .print-btn-main {
+        .add-btn, .print-btn-main, .import-btn {
             padding: 12px 24px;
             background: linear-gradient(135deg, #8BEB9B 0%, #DAFDE0 100%);
             color: #193532;
@@ -769,7 +769,6 @@ tbody {
 
 /* Ensure the last column (Action) stays visible */
 td:last-child {
-    position: sticky;
     right: 0;
     background: white;
     overflow: visible !important;
@@ -802,7 +801,6 @@ td:nth-child(7)  /* Farm Location */
 
 /* Make action column always visible */
 td:last-child {
-    position: sticky;
     right: 0;
     background: white;
     box-shadow: -2px 0 4px rgba(0, 0, 0, 0.05);
@@ -901,7 +899,7 @@ td[title] {
     border: 1px solid #e0e0e0;
     overflow: visible;
     min-width: 140px;
-    z-index: 1000;
+    z-index: 9;
     display: none;
 }
 

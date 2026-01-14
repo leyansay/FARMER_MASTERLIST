@@ -106,10 +106,12 @@
                 >
                 <div class="controls-right">
                     <select class="sort-select" id="sortSelect" onchange="sortTable()">
+                        <option value="alphabetical" selected>Alphabetical (A-Z)</option>
                         <option value="latest">Latest</option>
                         <option value="oldest">Oldest</option>
                     </select>
                     <button class="print-btn-main" onclick="window.location.href='print.html'">Print</button>
+                    <button class="import-btn" onclick="window.location.href='import.html'">Import Excel</button>
                     <button class="add-btn" onclick="openModal()">+ Add Farmer</button>
                 </div>
             </div>
@@ -119,7 +121,7 @@
                     <thead>
                         <tr>
                             <th>Surname</th>
-                            <th>Name</th>
+                            <th>Firstname</th>
                             <th>Middle Name</th>
                             <th>Address Line 1</th>
                             <th>Address Line 2</th>

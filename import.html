@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel File Importer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .upload-section {
+            padding: 40px;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-btn, .export-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            color: white;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: none;
+            margin: 0 10px;
+        }
+
+        .upload-btn:hover, .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #193532 0%, #8BEB9B 100%);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .export-btn:hover {
+            box-shadow: 0 6px 20px rgba(17, 153, 142, 0.6);
+        }
+
+        .export-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-name {
+            margin-top: 15px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .table-container {
+            padding: 40px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        thead {
+            background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tbody tr:hover {
+            background: #f8f9ff;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        tbody tr:nth-child(even):hover {
+            background: #f8f9ff;
+        }
+
+        .import-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #8BEB9B 0%, #DAFDE0 100%);
+            color: #193532;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-top: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .stats {
+            padding: 20px 40px;
+            background: #f8f9ff;
+            border-top: 2px solid #f0f0f0;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stats.active {
+            display: flex;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        #previewTable {
+            display: none;
+        }
+
+        #previewTable.active {
+            display: block;
+        }
+
+        .section-title {
+             background: linear-gradient(135deg, #8BEB9B 0%, #193532 100%);
+            color: white;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .modal-btn-cancel {
+            background: #e0e0e0;
+            color: #218a2c;
+        }
+
+        .modal-btn-cancel:hover {
+            background: #d0d0d0;
+            transform: translateY(-2px);
+        }
+
+        .modal-btn {
+            padding: 10px 30px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-ok {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .modal-btn-ok:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar.active {
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Excel File Importer</h1>
+            <p>Upload your Excel file and export to Master File</p>
+            <button class="import-btn" onclick="window.location.href='home.html'">Back To Home</button>
+        </div>
+
+        <div class="upload-section">
+            <div class="file-input-wrapper">
+                <label class="upload-btn">
+                    Choose Excel File
+                    <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
+                </label>
+            </div>
+            <button class="export-btn" id="exportBtn" disabled>Export to Master File</button>
+            <div class="file-name" id="fileName">No file selected</div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill">0%</div>
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="rowCount">0</div>
+                <div class="stat-label">Rows</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="colCount">0</div>
+                <div class="stat-label">Columns</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="sheetName">-</div>
+                <div class="stat-label">Sheet Name</div>
+            </div>
+        </div>
+
+        <div class="table-container" id="previewTable">
+            <div class="section-title">Preview</div>
+            <table id="dataTable"></table>
+        </div>
+    </div>
+
+    <div class="modal" id="confirmModal">
+        <div class="modal-content">
+            <h2>⚠️ Confirm Export</h2>
+            <p id="confirmMessage">Are you sure you want to export these farmers to Master File?</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button class="modal-btn modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="modal-btn modal-btn-ok" onclick="confirmExport()">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <h2>✓ Success!</h2>
+            <p id="successMessage">Data exported successfully to Master File!</p>
+            <button class="modal-btn modal-btn-ok" onclick="closeSuccessModal()">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB_hLdWDYdBsZFmhTFpg4QIzdOiB9JxxIw",
+            authDomain: "nfa-main.firebaseapp.com",
+            databaseURL: "https://farmer-s-masterlist-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "nfa-main",
+            storageBucket: "nfa-main.firebasestorage.app",
+            messagingSenderId: "314192469082",
+            appId: "1:314192469082:web:2f301895179a22dbe68c63",
+            measurementId: "G-ZEJP0S67SY"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const farmersRef = database.ref('farmers');
+
+        // Test Firebase connection
+        farmersRef.once('value')
+            .then(snapshot => {
+                console.log('✓ Firebase connected successfully!');
+                console.log('Current farmers in database:', snapshot.numChildren());
+            })
+            .catch(error => {
+                console.error('✗ Firebase connection error:', error);
+                alert('Cannot connect to Firebase! Please check your internet connection.');
+            });
+
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const previewTable = document.getElementById('previewTable');
+        const dataTable = document.getElementById('dataTable');
+        const stats = document.getElementById('stats');
+        const rowCount = document.getElementById('rowCount');
+        const colCount = document.getElementById('colCount');
+        const sheetName = document.getElementById('sheetName');
+        const exportBtn = document.getElementById('exportBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+
+        let currentData = null;
+
+        fileInput.addEventListener('change', handleFile);
+        exportBtn.addEventListener('click', exportToFirebase);
+
+        // Function to split full name into surname, firstname, and middle name
+        function splitFullName(fullName) {
+            if (!fullName || fullName.toString().trim() === '') {
+                return { surname: 'N/A', firstName: 'N/A', middleName: 'N/A' };
+            }
+            
+            const nameParts = fullName.toString().trim().toUpperCase().split(/\s+/);
+            
+            if (nameParts.length === 1) {
+                return { surname: nameParts[0], firstName: 'N/A', middleName: 'N/A' };
+            } else if (nameParts.length === 2) {
+                return { surname: nameParts[0], firstName: nameParts[1], middleName: 'N/A' };
+            } else {
+                // 3 or more parts: First is surname, last is middle name, everything in between is first name
+                const surname = nameParts[0];
+                const middleName = nameParts[nameParts.length - 1];
+                const firstName = nameParts.slice(1, -1).join(' ');
+                return { surname, firstName, middleName };
+            }
+        }
+
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            fileName.textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+                
+                // Transform data to split full name into separate columns
+                const headers = jsonData[0] || [];
+                const transformedData = [['SURNAME', 'FIRSTNAME', 'MIDDLE NAME', ...headers.slice(1)]];
+                
+                for (let i = 1; i < jsonData.length; i++) {
+                    const row = jsonData[i];
+                    if (!row || row.length === 0) continue;
+                    
+                    const fullName = row[0];
+                    const { surname, firstName, middleName } = splitFullName(fullName);
+                    transformedData.push([surname, firstName, middleName, ...row.slice(1)]);
+                }
+                
+                currentData = transformedData;
+                displayPreview(transformedData, workbook.SheetNames[0]);
+                exportBtn.disabled = false;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function displayPreview(data, sheet) {
+            if (!data || data.length === 0) {
+                previewTable.classList.remove('active');
+                stats.classList.remove('active');
+                return;
+            }
+
+            // Filter out completely empty rows
+            const filteredData = [data[0]]; // Keep header
+            for (let i = 1; i < data.length; i++) {
+                const row = data[i];
+                const hasData = row && row.some(cell => cell !== undefined && cell !== null && cell !== '');
+                if (hasData) {
+                    filteredData.push(row);
+                }
+            }
+
+            // Update currentData with filtered data
+            currentData = filteredData;
+
+            previewTable.classList.add('active');
+            stats.classList.add('active');
+
+            const maxCols = Math.max(...filteredData.map(row => row.length));
+
+            rowCount.textContent = filteredData.length - 1; // Exclude header
+            colCount.textContent = maxCols;
+            sheetName.textContent = sheet;
+
+            let html = '<thead><tr>';
+            
+            for (let i = 0; i < maxCols; i++) {
+                const header = filteredData[0][i];
+                html += `<th>${header || 'Column ' + (i + 1)}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            for (let i = 1; i < filteredData.length; i++) {
+                html += '<tr>';
+                for (let j = 0; j < maxCols; j++) {
+                    const cell = filteredData[i][j];
+                    const cellValue = cell !== undefined && cell !== null && cell !== '' ? cell : 'N/A';
+                    html += `<td>${cellValue}</td>`;
+                }
+                html += '</tr>';
+            }
+
+            html += '</tbody>';
+            dataTable.innerHTML = html;
+        }
+
+        async function exportToFirebase() {
+            exportBtn.disabled = true;
+            exportBtn.textContent = 'Exporting...';
+            progressBar.classList.add('active');
+            
+            const totalRows = currentData.length - 1;
+            let processedRows = 0;
+            let successCount = 0;
+            let errorCount = 0;
+
+            console.log('Starting export of', totalRows, 'farmers...');
+
+            for (let i = 1; i < currentData.length; i++) {
+                const row = currentData[i];
+                
+                const farmer = {
+                    surname: (row[0] || '').toString().trim().toUpperCase() || 'N/A',
+                    name: (row[1] || '').toString().trim().toUpperCase() || 'N/A',
+                    middleName: (row[2] || '').toString().trim().toUpperCase() || 'N/A',
+                    address1: (row[3] || '').toString().trim().toUpperCase() || 'N/A',
+                    address2: (row[4] || '').toString().trim().toUpperCase() || 'N/A',
+                    address3: (row[5] || '').toString().trim().toUpperCase() || 'N/A',
+                    farmLocation: (row[6] || '').toString().trim().toUpperCase() || 'N/A',
+                    birthdate: (row[7] || '').toString().trim() || 'N/A',
+                    gender: (row[8] || '').toString().trim() || 'N/A',
+                    civilStatus: (row[9] || '').toString().trim() || 'N/A',
+                    farmArea: (row[10] || '').toString().trim() || 'N/A',
+                    rsbsaNumber: (row[11] || '').toString().trim().toUpperCase() || 'N/A',
+                    contactNumber: (row[12] || '').toString().trim() || 'N/A',
+                    dateAdded: new Date().toISOString()
+                };
+
+                try {
+                    await farmersRef.push(farmer);
+                    successCount++;
+                    console.log(`Exported farmer ${i}:`, farmer.surname, farmer.name);
+                } catch (error) {
+                    console.error('Error adding farmer:', error);
+                    errorCount++;
+                }
+
+                processedRows++;
+                const progress = Math.round((processedRows / totalRows) * 100);
+                progressFill.style.width = progress + '%';
+                progressFill.textContent = progress + '%';
+            }
+
+            console.log('Export complete! Success:', successCount, 'Errors:', errorCount);
+
+            progressBar.classList.remove('active');
+            exportBtn.disabled = false;
+            exportBtn.textContent = 'Export to Master File';
+
+            document.getElementById('successMessage').innerHTML = 
+                `Successfully exported ${successCount} farmers to Master File!` +
+                (errorCount > 0 ? `<br><span style="color: #ff0000;">${errorCount} rows failed to export.</span>` : '');
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('successModal').classList.remove('active');
+            // Redirect to Farmer Masterlist page
+            window.location.href = 'home.html';
+        }
+    </script>
+</body>
+</html>
